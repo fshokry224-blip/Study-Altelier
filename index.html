@@ -136,6 +136,698 @@ function clock(){let d=new Date();document.getElementById('clock').textContent=d
 function calc(){let s=+document.getElementById('score').value,t=+document.getElementById('total').value;if(t>0){let p=s/t*100;document.getElementById('result').innerHTML=`<b>${p.toFixed(1)}%</b> · ${Math.max(0,100-p).toFixed(1)}% away from 100%`}}
 document.getElementById('score').addEventListener('input',calc);document.getElementById('total').addEventListener('input',calc);
 function calendar(){let el=document.getElementById('cal'),d=new Date(),y=d.getFullYear(),m=d.getMonth(),first=new Date(y,m,1).getDay(),last=new Date(y,m+1,0).getDate();['S','M','T','W','T','F','S'].forEach(x=>{let a=document.createElement('div');a.className='head';a.textContent=x;el.appendChild(a)});for(let i=0;i<first;i++)el.appendChild(document.createElement('div'));for(let n=1;n<=last;n++){let a=document.createElement('div');a.textContent=n;if(n===d.getDate())a.className='today';el.appendChild(a)}}calendar();
+  /* ==========================================
+   WORKING NOTEBOOK SHELF
+   Added without changing the original layout
+========================================== */
+
+(function () {
+
+  const notebooks = {
+    "Arabic": {
+      icon: "🇦🇪",
+      description: "Lessons · PDFs · homework · quizzes · mistakes"
+    },
+    "English": {
+      icon: "🇬🇧",
+      description: "Vocabulary · grammar · reading · writing · marks"
+    },
+    "History": {
+      icon: "📜",
+      description: "Lessons · timelines · recall · quizzes · reviews"
+    },
+    "Programming": {
+      icon: "💻",
+      description: "Lessons · code practice · projects · notes"
+    }
+  };
+
+  let currentSubject = null;
+
+  /* ---------- STORAGE ---------- */
+
+  function storageKey(type, subject) {
+    return "studyAtelier_" + type + "_" + subject;
+  }
+
+  function getNotes(subject) {
+    return localStorage.getItem(
+      storageKey("notes", subject)
+    ) || "";
+  }
+
+  function getFiles(subject) {
+    try {
+      return JSON.parse(
+        localStorage.getItem(
+          storageKey("files", subject)
+        )
+      ) || [];
+    } catch {
+      return [];
+    }
+  }
+
+  function saveFiles(subject, files) {
+    localStorage.setItem(
+      storageKey("files", subject),
+      JSON.stringify(files)
+    );
+  }
+
+
+  /* ---------- CREATE NOTEBOOK WINDOW ---------- */
+
+  const overlay = document.createElement("div");
+
+  overlay.id = "studyNotebookOverlay";
+
+  overlay.innerHTML = `
+    <div id="studyNotebookBox">
+
+      <div class="studyNotebookTop">
+
+        <div>
+          <div id="studyNotebookTitle">
+            📚 Notebook
+          </div>
+
+          <div id="studyNotebookDescription"></div>
+        </div>
+
+        <button id="studyNotebookClose">
+          ← Back
+        </button>
+
+      </div>
+
+
+      <div class="studyNotebookColumns">
+
+        <div class="studyNotebookPanel">
+
+          <h3>📝 Notes</h3>
+
+          <textarea
+            id="studyNotebookNotes"
+            placeholder="Write your notes here..."
+          ></textarea>
+
+          <button
+            class="studyNotebookButton"
+            id="studyNotebookSave"
+          >
+            Save notes
+          </button>
+
+          <div id="studyNotebookSaved"></div>
+
+        </div>
+
+
+        <div class="studyNotebookPanel">
+
+          <h3>📎 Files & uploads</h3>
+
+          <label
+            class="studyUploadBox"
+            for="studyNotebookFiles"
+          >
+            <div style="font-size:28px">＋</div>
+            <div>Click to upload files</div>
+            <small>
+              PDFs · photos · documents · homework
+            </small>
+          </label>
+
+          <input
+            id="studyNotebookFiles"
+            type="file"
+            multiple
+            style="display:none"
+          >
+
+          <div id="studyNotebookFileList"></div>
+
+        </div>
+
+      </div>
+
+    </div>
+  `;
+
+  document.body.appendChild(overlay);
+
+
+  /* ---------- NOTEBOOK STYLING ---------- */
+
+  const style = document.createElement("style");
+
+  style.textContent = `
+
+    #studyNotebookOverlay {
+      display:none;
+      position:fixed;
+      inset:0;
+      z-index:99999;
+      background:rgba(15,10,8,.92);
+      padding:25px;
+      overflow:auto;
+    }
+
+    #studyNotebookOverlay.open {
+      display:block;
+    }
+
+    #studyNotebookBox {
+      max-width:1000px;
+      margin:20px auto;
+      background:#241915;
+      border:1px solid #51392e;
+      border-radius:20px;
+      padding:22px;
+      color:#ead8c5;
+      box-shadow:0 20px 60px #0008;
+    }
+
+    .studyNotebookTop {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:15px;
+      margin-bottom:20px;
+    }
+
+    #studyNotebookTitle {
+      font-size:28px;
+    }
+
+    #studyNotebookDescription {
+      color:#b79e8c;
+      margin-top:5px;
+      font-size:12px;
+    }
+
+    #studyNotebookClose,
+    .studyNotebookButton {
+      background:#4b3429;
+      color:#ead8c5;
+      border:1px solid #6b4a39;
+      border-radius:10px;
+      padding:9px 13px;
+      cursor:pointer;
+      font-family:Georgia,serif;
+    }
+
+    #studyNotebookClose:hover,
+    .studyNotebookButton:hover {
+      background:#5b3e30;
+    }
+
+    .studyNotebookColumns {
+      display:grid;
+      grid-template-columns:1fr 1fr;
+      gap:15px;
+    }
+
+    .studyNotebookPanel {
+      background:#30211b;
+      border:1px solid #51392e;
+      border-radius:15px;
+      padding:16px;
+    }
+
+    .studyNotebookPanel h3 {
+      margin-top:0;
+    }
+
+    #studyNotebookNotes {
+      width:100%;
+      min-height:230px;
+      resize:vertical;
+      background:#211612;
+      color:#ead8c5;
+      border:1px solid #51392e;
+      border-radius:10px;
+      padding:10px;
+      font-family:Georgia,serif;
+      box-sizing:border-box;
+      margin-bottom:10px;
+    }
+
+    .studyUploadBox {
+      display:block;
+      text-align:center;
+      padding:25px;
+      border:1px dashed #765340;
+      border-radius:12px;
+      color:#b79e8c;
+      cursor:pointer;
+    }
+
+    .studyUploadBox:hover {
+      background:#2a1c17;
+      color:#ead8c5;
+    }
+
+    .studyUploadBox small {
+      display:block;
+      margin-top:5px;
+    }
+
+    .studyFile {
+      display:flex;
+      justify-content:space-between;
+      align-items:center;
+      gap:8px;
+      background:#2b1e18;
+      border:1px solid #51392e;
+      border-radius:9px;
+      padding:9px;
+      margin-top:8px;
+    }
+
+    .studyFileName {
+      overflow:hidden;
+      text-overflow:ellipsis;
+      white-space:nowrap;
+    }
+
+    .studyFile button {
+      background:#4b3429;
+      color:#ead8c5;
+      border:1px solid #6b4a39;
+      border-radius:7px;
+      padding:5px 8px;
+      cursor:pointer;
+      flex-shrink:0;
+    }
+
+    #studyNotebookSaved {
+      color:#b99773;
+      font-size:11px;
+      margin-top:7px;
+      min-height:14px;
+    }
+
+    @media(max-width:700px) {
+      #studyNotebookOverlay {
+        padding:10px;
+      }
+
+      #studyNotebookBox {
+        margin:0 auto;
+      }
+
+      .studyNotebookColumns {
+        grid-template-columns:1fr;
+      }
+
+      .studyNotebookTop {
+        align-items:flex-start;
+      }
+
+      #studyNotebookTitle {
+        font-size:23px;
+      }
+    }
+
+  `;
+
+  document.head.appendChild(style);
+
+
+  /* ---------- OPEN ---------- */
+
+  function openNotebook(subject) {
+
+    currentSubject = subject;
+
+    const data = notebooks[subject];
+
+    if (!data) return;
+
+    document.getElementById(
+      "studyNotebookTitle"
+    ).textContent =
+      data.icon + " " + subject + " Notebook";
+
+    document.getElementById(
+      "studyNotebookDescription"
+    ).textContent =
+      data.description;
+
+    document.getElementById(
+      "studyNotebookNotes"
+    ).value =
+      getNotes(subject);
+
+    document.getElementById(
+      "studyNotebookSaved"
+    ).textContent = "";
+
+    renderFiles();
+
+    overlay.classList.add("open");
+
+    document.body.style.overflow = "hidden";
+  }
+
+
+  /* ---------- CLOSE ---------- */
+
+  function closeNotebook() {
+
+    overlay.classList.remove("open");
+
+    document.body.style.overflow = "";
+
+    currentSubject = null;
+  }
+
+
+  document.getElementById(
+    "studyNotebookClose"
+  ).addEventListener(
+    "click",
+    closeNotebook
+  );
+
+
+  /* ---------- SAVE NOTES ---------- */
+
+  document.getElementById(
+    "studyNotebookSave"
+  ).addEventListener(
+    "click",
+    function () {
+
+      if (!currentSubject) return;
+
+      localStorage.setItem(
+        storageKey("notes", currentSubject),
+        document.getElementById(
+          "studyNotebookNotes"
+        ).value
+      );
+
+      const message =
+        document.getElementById(
+          "studyNotebookSaved"
+        );
+
+      message.textContent = "✓ Notes saved";
+
+      setTimeout(function () {
+        message.textContent = "";
+      }, 2000);
+
+    }
+  );
+
+
+  /* ---------- FILE UPLOAD ---------- */
+
+  document.getElementById(
+    "studyNotebookFiles"
+  ).addEventListener(
+    "change",
+    function (event) {
+
+      if (!currentSubject) return;
+
+      const selected =
+        Array.from(event.target.files);
+
+      if (!selected.length) return;
+
+      const existing =
+        getFiles(currentSubject);
+
+      let remaining = selected.length;
+
+      selected.forEach(function (file) {
+
+        const reader =
+          new FileReader();
+
+        reader.onload = function (e) {
+
+          existing.push({
+            id:
+              Date.now() +
+              Math.random(),
+
+            name:
+              file.name,
+
+            type:
+              file.type,
+
+            data:
+              e.target.result
+          });
+
+          remaining--;
+
+          if (remaining === 0) {
+
+            saveFiles(
+              currentSubject,
+              existing
+            );
+
+            renderFiles();
+
+          }
+
+        };
+
+        reader.readAsDataURL(file);
+
+      });
+
+      event.target.value = "";
+
+    }
+  );
+
+
+  /* ---------- DISPLAY FILES ---------- */
+
+  function renderFiles() {
+
+    const list =
+      document.getElementById(
+        "studyNotebookFileList"
+      );
+
+    list.innerHTML = "";
+
+    if (!currentSubject) return;
+
+    const files =
+      getFiles(currentSubject);
+
+    if (!files.length) {
+
+      list.innerHTML =
+        '<div style="color:#b79e8c;font-size:11px;margin-top:12px;text-align:center;">No files uploaded yet.</div>';
+
+      return;
+
+    }
+
+    files.forEach(function (file) {
+
+      const row =
+        document.createElement("div");
+
+      row.className =
+        "studyFile";
+
+
+      const name =
+        document.createElement("div");
+
+      name.className =
+        "studyFileName";
+
+      name.textContent =
+        "📄 " + file.name;
+
+
+      const actions =
+        document.createElement("div");
+
+      const open =
+        document.createElement("button");
+
+      open.textContent =
+        "Open";
+
+      open.onclick =
+        function () {
+
+          const w =
+            window.open();
+
+          if (!w) {
+
+            alert(
+              "Please allow pop-ups for this site."
+            );
+
+            return;
+
+          }
+
+          w.document.write(
+            "<title>" +
+            escapeHTML(file.name) +
+            "</title>" +
+            '<iframe src="' +
+            file.data +
+            '" style="width:100%;height:100vh;border:0;"></iframe>'
+          );
+
+        };
+
+
+      const remove =
+        document.createElement("button");
+
+      remove.textContent =
+        "×";
+
+      remove.onclick =
+        function () {
+
+          const remaining =
+            getFiles(currentSubject)
+              .filter(function (x) {
+                return x.id !== file.id;
+              });
+
+          saveFiles(
+            currentSubject,
+            remaining
+          );
+
+          renderFiles();
+
+        };
+
+
+      actions.appendChild(open);
+      actions.appendChild(remove);
+
+      row.appendChild(name);
+      row.appendChild(actions);
+
+      list.appendChild(row);
+
+    });
+
+  }
+
+
+  /* ---------- HTML ESCAPE ---------- */
+
+  function escapeHTML(text) {
+
+    return text
+      .replace(/&/g,"&amp;")
+      .replace(/</g,"&lt;")
+      .replace(/>/g,"&gt;")
+      .replace(/"/g,"&quot;")
+      .replace(/'/g,"&#039;");
+
+  }
+
+
+  /* ---------- CONNECT EXISTING BOOK CARDS ---------- */
+
+  const books =
+    document.querySelectorAll(".book");
+
+  books.forEach(function (book) {
+
+    const text =
+      book.textContent.toLowerCase();
+
+    let subject = null;
+
+    if (text.includes("arabic"))
+      subject = "Arabic";
+
+    else if (text.includes("english"))
+      subject = "English";
+
+    else if (text.includes("history"))
+      subject = "History";
+
+    else if (text.includes("programming"))
+      subject = "Programming";
+
+
+    if (subject) {
+
+      book.style.cursor = "pointer";
+
+      book.addEventListener(
+        "click",
+        function () {
+          openNotebook(subject);
+        }
+      );
+
+    }
+
+  });
+
+
+  /* ---------- CONNECT + BUTTONS ---------- */
+
+  const buttons =
+    document.querySelectorAll(".btn");
+
+  buttons.forEach(function (button) {
+
+    const text =
+      button.textContent
+        .trim()
+        .toLowerCase();
+
+    let subject = null;
+
+    if (text === "+ arabic")
+      subject = "Arabic";
+
+    else if (text === "+ english")
+      subject = "English";
+
+    else if (text === "+ history")
+      subject = "History";
+
+    else if (text === "+ programming")
+      subject = "Programming";
+
+
+    if (subject) {
+
+      button.addEventListener(
+        "click",
+        function () {
+          openNotebook(subject);
+        }
+      );
+
+    }
+
+  });
+
+})();
 </script>
 </body>
 </html>
