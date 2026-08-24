@@ -209,16 +209,40 @@ button{
     var(--caramel)
   );
   border-radius:99px;
+  transition:width .35s ease;
 }
 
 .subject{
-  margin:12px 0;
+  margin:15px 0 20px;
 }
 
 .subjectrow{
   display:flex;
   justify-content:space-between;
   font-size:12px;
+}
+
+.subjectButtons{
+  display:flex;
+  gap:6px;
+  margin-top:7px;
+  flex-wrap:wrap;
+}
+
+.subjectStats{
+  display:flex;
+  gap:8px;
+  flex-wrap:wrap;
+  color:var(--muted);
+  font-size:10px;
+  margin-top:4px;
+}
+
+.subjectStat{
+  background:#2b1e18;
+  border:1px solid #51392e;
+  border-radius:999px;
+  padding:4px 7px;
 }
 
 .actions{
@@ -238,6 +262,10 @@ button{
 
 .btn:hover{
   background:#5b3e30;
+}
+
+.btn.active{
+  background:#72503c;
 }
 
 .todo{
@@ -392,9 +420,22 @@ input[type=text]{
   padding:10px;
 }
 
-/* =========================
-   NOTEBOOK MODAL
-========================= */
+.progressLegend{
+  background:#211612;
+  border:1px solid var(--line);
+  border-radius:12px;
+  padding:11px;
+  margin-bottom:15px;
+  color:var(--muted);
+  font-size:11px;
+  line-height:1.6;
+}
+
+.progressLegend b{
+  color:var(--cream);
+}
+
+/* NOTEBOOK */
 
 #studyNotebookOverlay{
   display:none;
@@ -493,8 +534,6 @@ input[type=text]{
   min-height:14px;
 }
 
-/* UPLOAD */
-
 .studyUploadBox{
   display:block;
   text-align:center;
@@ -548,7 +587,7 @@ input[type=text]{
   cursor:pointer;
 }
 
-/* QUIZ AREA */
+/* QUIZZES */
 
 .quizForm{
   display:grid;
@@ -634,6 +673,7 @@ input[type=text]{
 /* MOBILE */
 
 @media(max-width:1000px){
+
   .app{
     grid-template-columns:1fr;
   }
@@ -657,6 +697,7 @@ input[type=text]{
 }
 
 @media(max-width:700px){
+
   .main{
     padding:15px;
   }
@@ -930,61 +971,232 @@ input[type=text]{
 
   <div class="title">
     <h2>Subjects</h2>
-    <span class="pill">PROGRESS</span>
+    <span class="pill">AUTO PROGRESS</span>
   </div>
 
+  <div class="progressLegend">
+    <b>How progress works:</b>
+    Study sessions = 30% · Notes = 20% · Files = 20% ·
+    Quiz performance = 30%.
+    Everything updates automatically.
+  </div>
+
+
+  <!-- ARABIC -->
 
   <div class="subject">
 
     <div class="subjectrow">
       <span>🇦🇪 Arabic</span>
-      <b>0%</b>
+      <b id="ArabicPercent">0%</b>
     </div>
 
     <div class="bar">
-      <i style="width:0%"></i>
+      <i id="ArabicBar"></i>
+    </div>
+
+    <div class="subjectStats">
+
+      <span class="subjectStat" id="ArabicSessions">
+        📚 0 sessions
+      </span>
+
+      <span class="subjectStat" id="ArabicNotes">
+        📝 No notes
+      </span>
+
+      <span class="subjectStat" id="ArabicFiles">
+        📎 No files
+      </span>
+
+      <span class="subjectStat" id="ArabicQuiz">
+        ✦ No quizzes
+      </span>
+
+    </div>
+
+    <div class="subjectButtons">
+
+      <button class="btn"
+              onclick="studySubject('Arabic')">
+        + Study
+      </button>
+
+      <button class="btn"
+              onclick="reviseSubject('Arabic')">
+        ↻ Revision
+      </button>
+
+      <button class="btn"
+              onclick="openNotebook('Arabic')">
+        📖 Notebook
+      </button>
+
     </div>
 
   </div>
 
+
+  <!-- ENGLISH -->
 
   <div class="subject">
 
     <div class="subjectrow">
       <span>🇬🇧 English</span>
-      <b>0%</b>
+      <b id="EnglishPercent">0%</b>
     </div>
 
     <div class="bar">
-      <i style="width:0%"></i>
+      <i id="EnglishBar"></i>
+    </div>
+
+    <div class="subjectStats">
+
+      <span class="subjectStat" id="EnglishSessions">
+        📚 0 sessions
+      </span>
+
+      <span class="subjectStat" id="EnglishNotes">
+        📝 No notes
+      </span>
+
+      <span class="subjectStat" id="EnglishFiles">
+        📎 No files
+      </span>
+
+      <span class="subjectStat" id="EnglishQuiz">
+        ✦ No quizzes
+      </span>
+
+    </div>
+
+    <div class="subjectButtons">
+
+      <button class="btn"
+              onclick="studySubject('English')">
+        + Study
+      </button>
+
+      <button class="btn"
+              onclick="reviseSubject('English')">
+        ↻ Revision
+      </button>
+
+      <button class="btn"
+              onclick="openNotebook('English')">
+        📖 Notebook
+      </button>
+
     </div>
 
   </div>
 
+
+  <!-- HISTORY -->
 
   <div class="subject">
 
     <div class="subjectrow">
       <span>📜 History</span>
-      <b>0%</b>
+      <b id="HistoryPercent">0%</b>
     </div>
 
     <div class="bar">
-      <i style="width:0%"></i>
+      <i id="HistoryBar"></i>
+    </div>
+
+    <div class="subjectStats">
+
+      <span class="subjectStat" id="HistorySessions">
+        📚 0 sessions
+      </span>
+
+      <span class="subjectStat" id="HistoryNotes">
+        📝 No notes
+      </span>
+
+      <span class="subjectStat" id="HistoryFiles">
+        📎 No files
+      </span>
+
+      <span class="subjectStat" id="HistoryQuiz">
+        ✦ No quizzes
+      </span>
+
+    </div>
+
+    <div class="subjectButtons">
+
+      <button class="btn"
+              onclick="studySubject('History')">
+        + Study
+      </button>
+
+      <button class="btn"
+              onclick="reviseSubject('History')">
+        ↻ Revision
+      </button>
+
+      <button class="btn"
+              onclick="openNotebook('History')">
+        📖 Notebook
+      </button>
+
     </div>
 
   </div>
 
 
+  <!-- PROGRAMMING -->
+
   <div class="subject">
 
     <div class="subjectrow">
       <span>💻 Programming</span>
-      <b>0%</b>
+      <b id="ProgrammingPercent">0%</b>
     </div>
 
     <div class="bar">
-      <i style="width:0%"></i>
+      <i id="ProgrammingBar"></i>
+    </div>
+
+    <div class="subjectStats">
+
+      <span class="subjectStat" id="ProgrammingSessions">
+        📚 0 sessions
+      </span>
+
+      <span class="subjectStat" id="ProgrammingNotes">
+        📝 No notes
+      </span>
+
+      <span class="subjectStat" id="ProgrammingFiles">
+        📎 No files
+      </span>
+
+      <span class="subjectStat" id="ProgrammingQuiz">
+        ✦ No quizzes
+      </span>
+
+    </div>
+
+    <div class="subjectButtons">
+
+      <button class="btn"
+              onclick="studySubject('Programming')">
+        + Study
+      </button>
+
+      <button class="btn"
+              onclick="reviseSubject('Programming')">
+        ↻ Revision
+      </button>
+
+      <button class="btn"
+              onclick="openNotebook('Programming')">
+        📖 Notebook
+      </button>
+
     </div>
 
   </div>
@@ -1191,9 +1403,7 @@ input[type=text]{
 </div>
 
 
-<!-- =====================================================
-     NOTEBOOK WINDOW
-===================================================== -->
+<!-- NOTEBOOK WINDOW -->
 
 <div id="studyNotebookOverlay">
 
@@ -1346,17 +1556,404 @@ input[type=text]{
 <script>
 
 /* =====================================================
-   GLOBAL STORAGE HELPERS
+   SUBJECTS
+===================================================== */
+
+const subjects = [
+  "Arabic",
+  "English",
+  "History",
+  "Programming"
+];
+
+
+/* =====================================================
+   STORAGE
 ===================================================== */
 
 function storageKey(type, subject){
+  return "studyAtelier_" + type + "_" + subject;
+}
 
-  return "studyAtelier_" +
-         type +
-         "_" +
-         subject;
+
+/* =====================================================
+   SUBJECT STUDY DATA
+===================================================== */
+
+function getSubjectData(subject){
+
+  try{
+
+    return JSON.parse(
+      localStorage.getItem(
+        storageKey("progress",subject)
+      )
+    ) || {
+      sessions:0,
+      revisions:0,
+      studyDates:[]
+    };
+
+  }catch(e){
+
+    return {
+      sessions:0,
+      revisions:0,
+      studyDates:[]
+    };
+
+  }
 
 }
+
+
+function saveSubjectData(subject,data){
+
+  localStorage.setItem(
+    storageKey("progress",subject),
+    JSON.stringify(data)
+  );
+
+}
+
+
+/* =====================================================
+   ADD STUDY SESSION
+===================================================== */
+
+function studySubject(subject){
+
+  const data =
+    getSubjectData(subject);
+
+  const today =
+    new Date().toISOString().slice(0,10);
+
+  data.sessions++;
+
+  if(
+    !data.studyDates.includes(today)
+  ){
+
+    data.studyDates.push(today);
+
+  }
+
+  saveSubjectData(
+    subject,
+    data
+  );
+
+  updateSubjectProgress();
+
+  alert(
+    "📚 " +
+    subject +
+    " study session recorded!"
+  );
+
+}
+
+
+/* =====================================================
+   REVISION
+===================================================== */
+
+function reviseSubject(subject){
+
+  const data =
+    getSubjectData(subject);
+
+  const today =
+    new Date().toISOString().slice(0,10);
+
+  data.revisions++;
+
+  if(
+    !data.studyDates.includes(today)
+  ){
+
+    data.studyDates.push(today);
+
+  }
+
+  saveSubjectData(
+    subject,
+    data
+  );
+
+  updateSubjectProgress();
+
+  alert(
+    "↻ " +
+    subject +
+    " revision recorded!"
+  );
+
+}
+
+
+/* =====================================================
+   NOTES DATA
+===================================================== */
+
+function getNotes(subject){
+
+  return localStorage.getItem(
+    storageKey("notes",subject)
+  ) || "";
+
+}
+
+
+/* =====================================================
+   FILE DATA
+===================================================== */
+
+function getFiles(subject){
+
+  try{
+
+    return JSON.parse(
+      localStorage.getItem(
+        storageKey("files",subject)
+      )
+    ) || [];
+
+  }catch(e){
+
+    return [];
+
+  }
+
+}
+
+
+/* =====================================================
+   QUIZ DATA
+===================================================== */
+
+function getQuizzes(subject){
+
+  try{
+
+    return JSON.parse(
+      localStorage.getItem(
+        storageKey("quizzes",subject)
+      )
+    ) || [];
+
+  }catch(e){
+
+    return [];
+
+  }
+
+}
+
+
+/* =====================================================
+   CALCULATE QUIZ AVERAGE
+===================================================== */
+
+function getQuizAverage(subject){
+
+  const quizzes =
+    getQuizzes(subject);
+
+  if(!quizzes.length){
+    return null;
+  }
+
+  let totalPercentage = 0;
+
+  quizzes.forEach(function(quiz){
+
+    if(quiz.total > 0){
+
+      totalPercentage +=
+        quiz.score /
+        quiz.total *
+        100;
+
+    }
+
+  });
+
+  return totalPercentage /
+         quizzes.length;
+
+}
+
+
+/* =====================================================
+   INTELLIGENT SUBJECT PROGRESS
+=====================================================
+
+   STUDY SESSIONS = 30%
+   NOTES          = 20%
+   FILES          = 20%
+   QUIZZES        = 30%
+
+   Study:
+   10 sessions = full 30%
+
+   Notes:
+   Any saved notes = full 20%
+
+   Files:
+   1+ files = full 20%
+
+   Quizzes:
+   Quiz average directly becomes the
+   30% portion.
+
+===================================================== */
+
+function calculateSubjectProgress(subject){
+
+  const data =
+    getSubjectData(subject);
+
+  const notes =
+    getNotes(subject);
+
+  const files =
+    getFiles(subject);
+
+  const quizAverage =
+    getQuizAverage(subject);
+
+
+  /* STUDY COMPONENT */
+
+  const studyProgress =
+    Math.min(
+      data.sessions / 10,
+      1
+    ) * 30;
+
+
+  /* NOTES COMPONENT */
+
+  const notesProgress =
+    notes.trim().length > 0
+    ? 20
+    : 0;
+
+
+  /* FILE COMPONENT */
+
+  const fileProgress =
+    files.length > 0
+    ? 20
+    : 0;
+
+
+  /* QUIZ COMPONENT */
+
+  const quizProgress =
+    quizAverage !== null
+    ? quizAverage / 100 * 30
+    : 0;
+
+
+  const total =
+    studyProgress +
+    notesProgress +
+    fileProgress +
+    quizProgress;
+
+
+  return Math.round(
+    Math.min(
+      100,
+      total
+    )
+  );
+
+}
+
+
+/* =====================================================
+   UPDATE ALL SUBJECT BARS
+===================================================== */
+
+function updateSubjectProgress(){
+
+  subjects.forEach(function(subject){
+
+    const percentage =
+      calculateSubjectProgress(subject);
+
+    const data =
+      getSubjectData(subject);
+
+    const notes =
+      getNotes(subject);
+
+    const files =
+      getFiles(subject);
+
+    const quizAverage =
+      getQuizAverage(subject);
+
+
+    document.getElementById(
+      subject + "Percent"
+    ).textContent =
+      percentage + "%";
+
+
+    document.getElementById(
+      subject + "Bar"
+    ).style.width =
+      percentage + "%";
+
+
+    document.getElementById(
+      subject + "Sessions"
+    ).textContent =
+      "📚 " +
+      data.sessions +
+      " session" +
+      (data.sessions === 1 ? "" : "s");
+
+
+    document.getElementById(
+      subject + "Notes"
+    ).textContent =
+      notes.trim().length > 0
+      ? "📝 Notes saved"
+      : "📝 No notes";
+
+
+    document.getElementById(
+      subject + "Files"
+    ).textContent =
+      files.length > 0
+      ? "📎 " +
+        files.length +
+        " file" +
+        (files.length === 1 ? "" : "s")
+      : "📎 No files";
+
+
+    document.getElementById(
+      subject + "Quiz"
+    ).textContent =
+      quizAverage !== null
+      ? "✦ Quiz " +
+        quizAverage.toFixed(0) +
+        "%"
+      : "✦ No quizzes";
+
+  });
+
+}
+
+
+updateSubjectProgress();
 
 
 /* =====================================================
@@ -1857,20 +2454,8 @@ let currentSubject = null;
 
 
 /* =====================================================
-   NOTES
+   SAVE NOTES
 ===================================================== */
-
-function getNotes(subject){
-
-  return localStorage.getItem(
-    storageKey(
-      "notes",
-      subject
-    )
-  ) || "";
-
-}
-
 
 function saveNotes(
   subject,
@@ -1889,30 +2474,8 @@ function saveNotes(
 
 
 /* =====================================================
-   FILES
+   SAVE FILES
 ===================================================== */
-
-function getFiles(subject){
-
-  try{
-
-    return JSON.parse(
-      localStorage.getItem(
-        storageKey(
-          "files",
-          subject
-        )
-      )
-    ) || [];
-
-  }catch(e){
-
-    return [];
-
-  }
-
-}
-
 
 function saveFiles(
   subject,
@@ -1945,30 +2508,8 @@ function saveFiles(
 
 
 /* =====================================================
-   QUIZZES
+   SAVE QUIZZES
 ===================================================== */
-
-function getQuizzes(subject){
-
-  try{
-
-    return JSON.parse(
-      localStorage.getItem(
-        storageKey(
-          "quizzes",
-          subject
-        )
-      )
-    ) || [];
-
-  }catch(e){
-
-    return [];
-
-  }
-
-}
-
 
 function saveQuizzes(
   subject,
@@ -2149,6 +2690,9 @@ document
         "✓ Notes saved";
 
 
+      updateSubjectProgress();
+
+
       setTimeout(
         function(){
 
@@ -2265,6 +2809,8 @@ document
                   renderFiles();
 
                 }
+
+                updateSubjectProgress();
 
               }
 
@@ -2480,6 +3026,8 @@ ${
 
           renderFiles();
 
+          updateSubjectProgress();
+
         };
 
 
@@ -2647,6 +3195,8 @@ document
 
 
       renderQuizzes();
+
+      updateSubjectProgress();
 
     }
   );
@@ -2833,6 +3383,8 @@ function renderQuizzes(){
 
           renderQuizzes();
 
+          updateSubjectProgress();
+
         };
 
 
@@ -2895,7 +3447,7 @@ function escapeHTML(text){
 
 
 /* =====================================================
-   CLOSE WITH ESCAPE KEY
+   CLOSE WITH ESCAPE
 ===================================================== */
 
 document.addEventListener(
@@ -2916,7 +3468,7 @@ document.addEventListener(
 
 
 /* =====================================================
-   CLOSE BY CLICKING OUTSIDE
+   CLOSE OUTSIDE
 ===================================================== */
 
 document
